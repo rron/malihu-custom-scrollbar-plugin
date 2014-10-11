@@ -555,7 +555,7 @@ and dependencies (minified).
             var expandClass = o.autoExpandScrollbar ? ' mCSB_scrollTools_onDrag_expand' : '';
             var scrollbar = [
                 '<div id="mCSB_' + d.idx + '_scrollbar_vertical" class="mCSB_scrollTools mCSB_' + d.idx + '_scrollbar mCS-' + o.theme + ' mCSB_scrollTools_vertical' + expandClass + '"><div class="mCSB_draggerContainer"><div id="mCSB_' + d.idx + '_dragger_vertical" class="mCSB_dragger" style="position:absolute;" oncontextmenu="return false;"><div class="mCSB_dragger_bar" /></div><div class="mCSB_draggerRail" /></div></div>',
-                '<div id="mCSB_' + d.idx + '_scrollbar_horizontal" class="mCSB_scrollTools mCSB_' + d.idx + '_scrollbar mCS-' + o.theme + ' mCSB_scrollTools_horizontal' + expandClass + '"><div class="mCSB_draggerContainer"><div id="mCSB_' + d.idx + '_dragger_horizontal" class="mCSB_dragger" style="position:absolute;" oncontextmenu="return false;""><div class="mCSB_dragger_bar" /></div><div class="mCSB_draggerRail" /></div></div>'
+                '<div id="mCSB_' + d.idx + '_scrollbar_horizontal" class="mCSB_scrollTools mCSB_' + d.idx + '_scrollbar mCS-' + o.theme + ' mCSB_scrollTools_horizontal' + expandClass + '"><div class="mCSB_draggerContainer"><div id="mCSB_' + d.idx + '_dragger_horizontal" class="mCSB_dragger" style="position:absolute;" oncontextmenu="return false;"><div class="mCSB_dragger_bar" /></div><div class="mCSB_draggerRail" /></div></div>'
             ];
             var wrapperClass = o.axis === 'yx' ? 'mCSB_vertical_horizontal' : o.axis === 'x' ? 'mCSB_horizontal' : 'mCSB_vertical';
             var scrollbars = o.axis === 'yx' ? scrollbar[0] + scrollbar[1] : o.axis === 'x' ? scrollbar[1] : scrollbar[0];
@@ -573,7 +573,7 @@ and dependencies (minified).
 
             o.setLeft = (o.axis !== 'y' && d.langDir === 'rtl') ? '989999px' : o.setLeft; /* adjust left position for rtl direction */
 
-            $this.addClass(pluginNS + ' _' + pluginPfx + '_' + d.idx + autoHideClass + scrollbarDirClass).wrapInner('<div id="mCSB_' + d.idx + ' class="mCustomScrollBox mCS-' + o.theme + ' ' + wrapperClass + '"><div id="mCSB_' + d.idx + '_container" class="mCSB_container" style="position:relative; top:' + o.setTop + '; left:' + o.setLeft + ';" dir=' + d.langDir + ' /></div>');
+            $this.addClass(pluginNS + ' _' + pluginPfx + '_' + d.idx + autoHideClass + scrollbarDirClass).wrapInner('<div id="mCSB_' + d.idx + '" class="mCustomScrollBox mCS-' + o.theme + ' ' + wrapperClass + '"><div id="mCSB_' + d.idx + '_container" class="mCSB_container" style="position:relative; top:' + o.setTop + '; left:' + o.setLeft + ';" dir="' + d.langDir + '" /></div>');
 
             var mCustomScrollBox = $('#mCSB_' + d.idx);
             var mCSB_container = $('#mCSB_' + d.idx + '_container');
