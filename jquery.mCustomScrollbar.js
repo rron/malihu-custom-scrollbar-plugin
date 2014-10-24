@@ -1,33 +1,34 @@
-/*
-Based on version: 3.0.4
-*/
+/* global define, $, jQuery, clearTimeout, setTimeout */
+
+/**
+ * Based on version 3.0.4
+ */
 
 ;(function (window, document, undefined) {
 
-    /* plugin dependencies */
-    (function (init) {
-        /* support for RequireJS */
-        if (typeof define === 'function' && define.amd) {
-            define(['jquery', 'jquery-mousewheel'], init);
-        } else {
-            /* dependency location protocol */
-            var protocol = ('https:' === document.location.protocol) ? 'https:' : 'http:'; 
-            var scriptTag;
+/* plugin dependencies */
+(function (init) {
+    /* support for RequireJS */
+    if (typeof define === 'function' && define.amd) {
+        define(['jquery', 'jquery-mousewheel'], init);
+    } else {
+        /* dependency location protocol */
+        var protocol = ('https:' === document.location.protocol) ? 'https:' : 'http:'; 
+        var scriptTag;
 
-            /* load jquery-mousewheel plugin (via CDN) if it's not present 
-            (works when mCustomScrollbar fn is called on window load) */
-            if (typeof $.event.special.mousewheel !== 'object') {
-                scriptTag = document.createElement('script');
-                scriptTag.src = protocol +
+        /* load jquery-mousewheel plugin (via CDN) if it's not present 
+        (works when mCustomScrollbar fn is called on window load) */
+        if (typeof $.event.special.mousewheel !== 'object') {
+            scriptTag       = document.createElement('script');
+            scriptTag.src   = protocol +
                                 '//cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.11/jquery.mousewheel.min.js';
 
-                $('head').append(scriptTag);
-            }
-
-            init(jQuery);
+            $('head').append(scriptTag);
         }
+
+        init(jQuery);
     }
-(function ($) {
+}(function ($) {
     /**
      * PLUGIN NAMESPACE, PREFIX, DEFAULT SELECTOR(S) 
      */
@@ -105,7 +106,7 @@ Based on version: 3.0.4
      *
      */
     totalInstances      = 0,
-    liveTimers          = {},
+    liveTimers          = [],
     oldIE               = (window.attachEvent && !window.addEventListener) ? 1 : 0,
     touchActive         = false,
     removeLiveTimers    = function (selector) {
@@ -121,8 +122,8 @@ Based on version: 3.0.4
      */
     methods = {
         init: function (initOptions) {
-            var options = $.extend(true, {}, defaults, initOptions);
-            var selector = functions._selector.call(this);
+            var options     = $.extend(true, {}, defaults, initOptions);
+            var selector    = functions._selector.call(this);
             var liveSelector;
             var $liveSelector;
 
@@ -138,17 +139,24 @@ Based on version: 3.0.4
                 liveTimers[liveSelector] = setTimeout(function () {
                     $liveSelector.mCustomScrollbar(options);
                     if (options.live === 'once' && $liveSelector.length) {
-                        removeLiveTimers(500);
+                        removeLiveTimers(liveSelector);
                     }
-                }, liveSelector);
+                }, 500);
             } else {
                 removeLiveTimers(liveSelector);
             }
 
-            options.setWidth = (options.set_width) ? options.set_width : options.setWidth;
-            options.setHeight = (options.set_height) ? options.set_height : options.setHeight;
-            options.axis = (options.horizontalScroll) ? 'x' : functions._findAxis.call(null,options.axis);
-            options.scrollInertia = options.scrollInertia > 0 && options.scrollInertia < 17
+            /* do we need this? */
+            // options.setWidth        = (options.set_width)
+            //                             ? options.set_width
+            //                             : options.setWidth;
+            // options.setHeight       = (options.set_height)
+            //                             ? options.set_height
+            //                             : options.setHeight;
+            // options.axis            = (options.horizontalScroll)
+            //                             ? 'x'
+            //                             : functions._findAxis.call(null, options.axis);
+            options.scrollInertia   = options.scrollInertia > 0 && options.scrollInertia < 17
                                         ? 17
                                         : options.scrollInertia;
 
@@ -164,13 +172,13 @@ Based on version: 3.0.4
                 };
             }
 
-            options.mouseWheel.scrollAmount = !options.mouseWheelPixels
-                                                ? options.mouseWheel.scrollAmount
-                                                : options.mouseWheelPixels;
-            options.mouseWheel.normalizeDelta = !options.advanced.normalizeMouseWheelDelta
+            options.mouseWheel.scrollAmount     = !options.mouseWheelPixels
+                                                    ? options.mouseWheel.scrollAmount
+                                                    : options.mouseWheelPixels;
+            options.mouseWheel.normalizeDelta   = !options.advanced.normalizeMouseWheelDelta
                                                     ? options.mouseWheel.normalizeDelta
                                                     : options.advanced.normalizeMouseWheelDelta;
-            options.scrollButtons.scrollType = functions._findScrollButtonsType
+            options.scrollButtons.scrollType    = functions._findScrollButtonsType
                                                     .call(null, options.scrollButtons.scrollType); 
 
             functions._theme.call(null, options); /* theme-specific options */
@@ -199,10 +207,10 @@ Based on version: 3.0.4
                         trigger         : null
                     });
 
-                    o = $this.data(pluginPfx).opt;
-                    htmlDataAxis = $this.data('mcs-axis');
-                    htmlDataSbPos = $this.data('mcs-scrollbar-position');
-                    htmlDataTheme = $this.data('mcs-theme');
+                    o               = $this.data(pluginPfx).opt;
+                    htmlDataAxis    = $this.data('mcs-axis');
+                    htmlDataSbPos   = $this.data('mcs-scrollbar-position');
+                    htmlDataTheme   = $this.data('mcs-theme');
 
                     if (htmlDataAxis) {
                         o.axis = htmlDataAxis;
@@ -301,8 +309,8 @@ Based on version: 3.0.4
                             functions._resetContentPosition.call(this); /* reset content position */
                         } else { /* y scrolling is required */
                             functions._scrollTo.call(this, $this, to[0].toString(), {
-                                dir: 'y',
-                                dur: 0,
+                                dir:        'y',
+                                dur:        0,
                                 overwrite: 'none'
                             });
                             d.contentReset.y = null;
@@ -317,8 +325,8 @@ Based on version: 3.0.4
                                 functions._unbindEvents.call(this);
                             } else if (o.axis === 'yx' && d.overflowed[0]) {
                                 functions._scrollTo.call(this, $this, to[0].toString(), {
-                                    dir: 'y',
-                                    dur: 0,
+                                    dir:        'y',
+                                    dur:        0,
                                     overwrite: 'none'
                                 });
                             }
@@ -326,8 +334,8 @@ Based on version: 3.0.4
                             functions._resetContentPosition.call(this); /* reset content position */
                         } else { /* x scrolling is required */
                             functions._scrollTo.call(this, $this, to[1].toString(), {
-                                dir: 'x',
-                                dur: 0,
+                                dir:        'x',
+                                dur:        0,
                                 overwrite: 'none'
                             });
                             d.contentReset.x = null;
@@ -369,15 +377,15 @@ Based on version: 3.0.4
                     d = $this.data(pluginPfx);
                     o = d.opt;
                     methodDefaults = { /* method default options */
-                        trigger: 'external', /* method is by default triggered externally (e.g. from other scripts) */
-                        scrollInertia: o.scrollInertia, /* scrolling inertia (animation duration) */
-                        scrollEasing: 'mcsEaseInOut', /* animation easing */
-                        moveDragger: false, /* move dragger instead of content */
-                        timeout: 60, /* scroll-to delay */
-                        callbacks: true, /* enable/disable callbacks */
-                        onStart: true,
-                        onUpdate: true,
-                        onComplete: true
+                        trigger:        'external', /* method is by default triggered externally (e.g. from other scripts) */
+                        scrollInertia:  o.scrollInertia, /* scrolling inertia (animation duration) */
+                        scrollEasing:   'mcsEaseInOut', /* animation easing */
+                        moveDragger:    false, /* move dragger instead of content */
+                        timeout:        60, /* scroll-to delay */
+                        callbacks:      true, /* enable/disable callbacks */
+                        onStart:        true,
+                        onUpdate:       true,
+                        onComplete:     true
                     };
                     methodOptions = $.extend(true, {}, methodDefaults,options);
                     to = functions._arr.call(this,val);
@@ -403,13 +411,17 @@ Based on version: 3.0.4
                     setTimeout(function () {
                         /* do the scrolling */
                         /* scroll y */
-                        if (to[0] !== null && typeof to[0] !== 'undefined' && o.axis !== 'x' && d.overflowed[0]) {
+                        if (to[0] !== null &&
+                             typeof to[0] !== 'undefined' &&
+                             o.axis !== 'x' && d.overflowed[0]) {
                             methodOptions.dir = 'y';
                             methodOptions.overwrite = 'all';
                             functions._scrollTo.call(this, $this, to[0].toString(), methodOptions);
                         }
                         /* scroll x */
-                        if (to[1] !== null && typeof to[1] !== 'undefined' && o.axis !== 'y' && d.overflowed[1]) {
+                        if (to[1] !== null &&
+                             typeof to[1] !== 'undefined' &&
+                             o.axis !== 'y' && d.overflowed[1]) {
                             methodOptions.dir = 'x';
                             methodOptions.overwrite = 'none';
                             functions._scrollTo.call(this, $this, to[1].toString(), methodOptions);
@@ -433,7 +445,7 @@ Based on version: 3.0.4
             var result = $(selector).each(function () {
                 var $this = $(this);
 
-                if($this.data(pluginPfx)) { /* check if plugin has initialized */
+                if ($this.data(pluginPfx)) { /* check if plugin has initialized */
                     functions._stop.call(null, $this);
                 }
             });
@@ -449,12 +461,12 @@ Based on version: 3.0.4
         reset (boolean): resets content position to 0 
         */
         disable: function (r) {
-            var selector=functions._selector.call(this); /* validate selector */
+            var selector = functions._selector.call(this); /* validate selector */
+            var d;
+            var o;
 
             var result = $(selector).each(function () {
                 var $this = $(this);
-                var d;
-                var o;
 
                 if ($this.data(pluginPfx)) { /* check if plugin has initialized */
                     d = $this.data(pluginPfx);
@@ -483,14 +495,14 @@ Based on version: 3.0.4
         */
         destroy: function() {
             var selector = functions._selector.call(this); /* validate selector */
+            var d;
+            var o;
+            var mCustomScrollBox;
+            var mCSB_container;
+            var scrollbar;
 
-            var result = $(selector).each(function () {
+            return $(selector).each(function () {
                 var $this = $(this);
-                var d;
-                var o;
-                var mCustomScrollBox;
-                var mCSB_container;
-                var scrollbar;
 
                 if ($this.data(pluginPfx)) { /* check if plugin has initialized */
                     d = $this.data(pluginPfx);
@@ -498,7 +510,7 @@ Based on version: 3.0.4
                     mCustomScrollBox = $('#mCSB_' + d.idx);
                     mCSB_container = $('#mCSB_' + d.idx + '_container');
                     scrollbar = $('.mCSB_' + d.idx + '_scrollbar');
-
+                
                     if (o.live) {
                         removeLiveTimers(selector);
                     } /* remove live timer */
@@ -519,13 +531,11 @@ Based on version: 3.0.4
                     mCustomScrollBox.replaceWith(mCSB_container.contents());
 
                     /* remove plugin classes from the element and add destroy class */
-                    $this.removeClass(pluginNS + ' _'+ pluginPfx + '_' + d.idx
-                                        + ' mCS-autoHide mCS-dir-rtl mCS_no_scrollbar mCS_disabled')
-                                        .addClass('mCS_destroyed');
+                    $this.removeClass(pluginNS
+                        + ' _' + pluginPfx + '_' + d.idx + ' mCS-autoHide mCS-dir-rtl mCS_no_scrollbar mCS_disabled')
+                    .addClass('mCS_destroyed');
                 }
             });
-
-            return result;
         }
     },
 
@@ -575,56 +585,70 @@ Based on version: 3.0.4
                 'minimal-dark'
             ];
 
-            obj.autoDraggerLength = $.inArray(obj.theme, fixedSizeScrollbarThemes) > -1 ? false : obj.autoDraggerLength;
-            obj.autoExpandScrollbar = $.inArray(obj.theme, nonExpandedScrollbarThemes) > -1
-                                        ? false
-                                        : obj.autoExpandScrollbar;
-            obj.scrollButtons.enable = $.inArray(obj.theme, disabledScrollButtonsThemes) > -1 
-                                        ? false
-                                        : obj.scrollButtons.enable;
-            obj.autoHideScrollbar = $.inArray(obj.theme, enabledAutoHideScrollbarThemes) > -1
-                                        ? true
-                                        : obj.autoHideScrollbar;
-            obj.scrollbarPosition = $.inArray(obj.theme, scrollbarPositionOutsideThemes) > -1 
-                                        ? 'outside'
-                                        : obj.scrollbarPosition;
+            obj.autoDraggerLength       = $.inArray(obj.theme, fixedSizeScrollbarThemes) > -1
+                                            ? false
+                                            : obj.autoDraggerLength;
+
+            obj.autoExpandScrollbar     = $.inArray(obj.theme, nonExpandedScrollbarThemes) > -1 
+                                            ? false
+                                            : obj.autoExpandScrollbar;
+
+            obj.scrollButtons.enable    = $.inArray(obj.theme, disabledScrollButtonsThemes) > -1
+                                            ? false
+                                            : obj.scrollButtons.enable;
+
+            obj.autoHideScrollbar       = $.inArray(obj.theme, enabledAutoHideScrollbarThemes) > -1
+                                            ? true
+                                            : obj.autoHideScrollbar;
+
+            obj.scrollbarPosition       = $.inArray(obj.theme, scrollbarPositionOutsideThemes) > -1
+                                            ? 'outside'
+                                            : obj.scrollbarPosition;
         },
 
         /* normalizes axis option to valid values: "y", "x", "yx" */
         _findAxis: function (val) {
             return (val === 'yx' || val === 'xy' || val === 'auto')
-                        ? 'yx'
-                        : (val === 'x' || val === 'horizontal') ? 'x' : 'y';
+                     ? 'yx'
+                     : (val === 'x' || val === 'horizontal') ? 'x' : 'y';
         },
 
         /* normalizes scrollButtons.scrollType option to valid values: 'stepless', 'stepped' */
         _findScrollButtonsType: function (val) {
             return (val === 'stepped' || val === 'pixels' || val === 'step' || val === 'click')
-                        ? 'stepped'
-                        : 'stepless';
+                     ? 'stepped'
+                     : 'stepless';
         },
 
         /* generates plugin markup */
         _pluginMarkup: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
+            var $this       = $(this);
+            var d           = $this.data(pluginPfx);
+            var o           = d.opt;
             var expandClass = o.autoExpandScrollbar ? ' mCSB_scrollTools_onDrag_expand' : '';
             var scrollbar = [
                 '<div id="mCSB_' + d.idx + '_scrollbar_vertical" class="mCSB_scrollTools mCSB_' + d.idx
                     + '_scrollbar mCS-' + o.theme + ' mCSB_scrollTools_vertical' + expandClass
                     + '"><div class="mCSB_draggerContainer"><div id="mCSB_' + d.idx
-                    + '_dragger_vertical" class="mCSB_dragger" style="position:absolute;" oncontextmenu="return false;">'
+                    + '_dragger_vertical" class="mCSB_dragger" style="position:absolute;" '
+                    + 'oncontextmenu="return false;">'
                     + '<div class="mCSB_dragger_bar" /></div><div class="mCSB_draggerRail" /></div></div>',
                 '<div id="mCSB_' + d.idx + '_scrollbar_horizontal" class="mCSB_scrollTools mCSB_' + d.idx
                     + '_scrollbar mCS-' + o.theme + ' mCSB_scrollTools_horizontal' + expandClass
                     + '"><div class="mCSB_draggerContainer"><div id="mCSB_' + d.idx
-                    + '_dragger_horizontal" class="mCSB_dragger" style="position:absolute;" oncontextmenu="return false;">'
+                    + '_dragger_horizontal" class="mCSB_dragger" style="position:absolute;" '
+                    + 'oncontextmenu="return false;">'
                     + '<div class="mCSB_dragger_bar" /></div><div class="mCSB_draggerRail" /></div></div>'
             ];
-            var wrapperClass = o.axis === 'yx' ? 'mCSB_vertical_horizontal' : o.axis === 'x' ? 'mCSB_horizontal' : 'mCSB_vertical';
-            var scrollbars = o.axis === 'yx' ? scrollbar[0] + scrollbar[1] : o.axis === 'x' ? scrollbar[1] : scrollbar[0];
-            var contentWrapper = o.axis === 'yx' ? '<div id="mCSB_' + d.idx + '_container_wrapper" class="mCSB_container_wrapper" />' : '';
+            var wrapperClass = o.axis === 'yx'
+                                ? 'mCSB_vertical_horizontal'
+                                : o.axis === 'x' ? 'mCSB_horizontal' : 'mCSB_vertical';
+            var scrollbars = o.axis === 'yx'
+                                ? scrollbar[0] + scrollbar[1]
+                                : o.axis === 'x' ? scrollbar[1] : scrollbar[0];
+            var contentWrapper = o.axis === 'yx'
+                                ? '<div id="mCSB_' + d.idx + '_container_wrapper" class="mCSB_container_wrapper" />'
+                                : '';
             var autoHideClass = o.autoHideScrollbar ? ' mCS-autoHide' : '';
             var scrollbarDirClass = (o.axis !== 'x' && d.langDir === 'rtl') ? ' mCS-dir-rtl' : '';
             var mCustomScrollBox;
@@ -644,7 +668,10 @@ Based on version: 3.0.4
                             : o.setLeft; /* adjust left position for rtl direction */
 
             $this.addClass(pluginNS + ' _' + pluginPfx + '_' + d.idx + autoHideClass + scrollbarDirClass)
-                    .wrapInner('<div id="mCSB_' + d.idx + '" class="mCustomScrollBox mCS-' + o.theme + ' ' + wrapperClass + '"><div id="mCSB_' + d.idx + '_container" class="mCSB_container" style="position:relative; top:' + o.setTop + '; left:' + o.setLeft + ';" dir="' + d.langDir + '" /></div>');
+                    .wrapInner('<div id="mCSB_' + d.idx + '" class="mCustomScrollBox mCS-' + o.theme
+                        + ' ' + wrapperClass + '"><div id="mCSB_' + d.idx
+                        + '_container" class="mCSB_container" style="position:relative; top:' + o.setTop + '; left:'
+                        + o.setLeft + ';" dir="' + d.langDir + '" /></div>');
 
             mCustomScrollBox = $('#mCSB_' + d.idx);
             mCSB_container = $('#mCSB_' + d.idx + '_container');
@@ -686,10 +713,10 @@ Based on version: 3.0.4
 
         /* expands content horizontally */
         _expandContentHorizontally: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
+            var $this           = $(this);
+            var d               = $this.data(pluginPfx);
+            var o               = d.opt;
+            var mCSB_container  = $('#mCSB_' + d.idx + '_container');
 
             if (o.advanced.autoExpandHorizontalScroll && o.axis !== 'y') {
                 /* 
@@ -719,10 +746,10 @@ Based on version: 3.0.4
 
         /* adds scrollbar buttons */
         _scrollButtons: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var mCSB_scrollTools = $('.mCSB_' + d.idx + '_scrollbar:first');
+            var $this               = $(this);
+            var d                   = $this.data(pluginPfx);
+            var o                   = d.opt;
+            var mCSB_scrollTools    = $('.mCSB_' + d.idx + '_scrollbar:first');
             var btnHTML = [
                 '<a href="#" class="mCSB_buttonUp" oncontextmenu="return false;" />',
                 '<a href="#" class="mCSB_buttonDown" oncontextmenu="return false;" />',
@@ -737,18 +764,23 @@ Based on version: 3.0.4
             ];
 
             if (o.scrollButtons.enable) {
-                mCSB_scrollTools.prepend(btn[0]).append(btn[1]).next('.mCSB_scrollTools').prepend(btn[2]).append(btn[3]);
+                mCSB_scrollTools
+                    .prepend(btn[0])
+                    .append(btn[1])
+                    .next('.mCSB_scrollTools')
+                    .prepend(btn[2])
+                    .append(btn[3]);
             }
         },
 
         /* detects/sets css max-height value */
         _maxHeight: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var mCustomScrollBox = $('#mCSB_' + d.idx);
-            var mh = $this.css('max-height');
-            var pct = mh.indexOf('%') !== -1;
-            var bs = $this.css('box-sizing');
+            var $this               = $(this);
+            var d                   = $this.data(pluginPfx);
+            var mCustomScrollBox    = $('#mCSB_' + d.idx);
+            var mh                  = $this.css('max-height');
+            var pct                 = mh.indexOf('%') !== -1;
+            var bs                  = $this.css('box-sizing');
             var val;
 
             if (mh !== 'none') {
@@ -766,10 +798,10 @@ Based on version: 3.0.4
 
         /* auto-adjusts scrollbar dragger length */
         _setDraggerLength: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var mCustomScrollBox = $('#mCSB_' + d.idx);
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
+            var $this               = $(this);
+            var d                   = $this.data(pluginPfx);
+            var mCustomScrollBox    = $('#mCSB_' + d.idx);
+            var mCSB_container      = $('#mCSB_' + d.idx + '_container');
             var mCSB_dragger = [
                 $('#mCSB_' + d.idx + '_dragger_vertical'),
                 $('#mCSB_' + d.idx + '_dragger_horizontal')
@@ -803,10 +835,10 @@ Based on version: 3.0.4
 
         /* calculates scrollbar to content ratio */
         _scrollRatio: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var mCustomScrollBox = $('#mCSB_' + d.idx);
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
+            var $this               = $(this);
+            var d                   = $this.data(pluginPfx);
+            var mCustomScrollBox    = $('#mCSB_' + d.idx);
+            var mCSB_container      = $('#mCSB_' + d.idx + '_container');
             var mCSB_dragger = [
                 $('#mCSB_' + d.idx + '_dragger_vertical'),
                 $('#mCSB_' + d.idx + '_dragger_horizontal')
@@ -829,8 +861,8 @@ Based on version: 3.0.4
         /* toggles scrolling classes */
         _onDragClasses: function (el, action, xpnd) {
             var expandClass = xpnd ? 'mCSB_dragger_onDrag_expanded' : '';
-            var classes = ['mCSB_dragger_onDrag','mCSB_scrollTools_onDrag'];
-            var scrollbar = el.closest('.mCSB_scrollTools');
+            var classes     = ['mCSB_dragger_onDrag','mCSB_scrollTools_onDrag'];
+            var scrollbar   = el.closest('.mCSB_scrollTools');
 
             if (action === 'active') {
                 el.toggleClass(classes[0] + ' ' + expandClass);
@@ -851,12 +883,16 @@ Based on version: 3.0.4
 
         /* checks if content overflows its container to determine if scrolling is required */
         _overflowed: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var mCustomScrollBox = $('#mCSB_' + d.idx);
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
-            var contentHeight = d.overflowed === null ? mCSB_container.height() : mCSB_container.outerHeight(false);
-            var contentWidth = d.overflowed === null ? mCSB_container.width() : mCSB_container.outerWidth(false);
+            var $this               = $(this);
+            var d                   = $this.data(pluginPfx);
+            var mCustomScrollBox    = $('#mCSB_' + d.idx);
+            var mCSB_container      = $('#mCSB_' + d.idx + '_container');
+            var contentHeight       = d.overflowed === null
+                                        ? mCSB_container.height()
+                                        : mCSB_container.outerHeight(false);
+            var contentWidth        = d.overflowed === null
+                                        ? mCSB_container.width()
+                                        : mCSB_container.outerWidth(false);
 
             return [
                 contentHeight > mCustomScrollBox.height(),
@@ -866,11 +902,11 @@ Based on version: 3.0.4
 
         /* resets content position to 0 */
         _resetContentPosition: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var mCustomScrollBox = $('#mCSB_' + d.idx);
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
+            var $this               = $(this);
+            var d                   = $this.data(pluginPfx);
+            var o                   = d.opt;
+            var mCustomScrollBox    = $('#mCSB_' + d.idx);
+            var mCSB_container      = $('#mCSB_' + d.idx + '_container');
             var mCSB_dragger = [
                 $('#mCSB_' + d.idx + '_dragger_vertical'),
                 $('#mCSB_' + d.idx + '_dragger_horizontal')
@@ -905,9 +941,9 @@ Based on version: 3.0.4
 
         /* binds scrollbar events */
         _bindEvents: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
+            var $this   = $(this);
+            var d       = $this.data(pluginPfx);
+            var o       = d.opt;
             var mousewheelTimeout;
             var _mwt = function _mwt () {
                 mousewheelTimeout = setTimeout(function () {
@@ -952,10 +988,10 @@ Based on version: 3.0.4
 
         /* unbinds scrollbar events */
         _unbindEvents: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var namespace = pluginPfx + '_' + d.idx;
-            var sb = '.mCSB_' + d.idx + '_scrollbar';
+            var $this       = $(this);
+            var d           = $this.data(pluginPfx);
+            var namespace   = pluginPfx + '_' + d.idx;
+            var sb          = '.mCSB_' + d.idx + '_scrollbar';
             var sel = $('#mCSB_' + d.idx + ',#mCSB_' + d.idx + '_container,#mCSB_' + d.idx + '_container_wrapper,'
                         + sb + ' .mCSB_draggerContainer,#mCSB_' + d.idx + '_dragger_vertical,#mCSB_' + d.idx
                         +'_dragger_horizontal,' + sb + '>a');
@@ -967,24 +1003,28 @@ Based on version: 3.0.4
                 sel.each(function () {
                     $(this).unbind('.' + namespace);
                 });
+
                 /* clear and delete timeouts/objects */
                 clearTimeout($this[0]._focusTimeout);
                 functions._delete.call(null, $this[0]._focusTimeout);
+
                 clearTimeout(d.sequential.step);
                 functions._delete.call(null, d.sequential.step);
+
                 clearTimeout(mCSB_container[0].onCompleteTimeout);
                 functions._delete.call(null, mCSB_container[0].onCompleteTimeout);
+
                 d.bindEvents = false;
             }
         },
 
         /* toggles scrollbar visibility */
         _scrollbarVisibility: function (disabled) {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var contentWrapper = $('#mCSB_' + d.idx + '_container_wrapper');
-            var content = contentWrapper.length ? contentWrapper : $('#mCSB_' + d.idx + '_container');
+            var $this           = $(this);
+            var d               = $this.data(pluginPfx);
+            var o               = d.opt;
+            var contentWrapper  = $('#mCSB_' + d.idx + '_container_wrapper');
+            var content         = contentWrapper.length ? contentWrapper : $('#mCSB_' + d.idx + '_container');
             var scrollbar = [
                 $('#mCSB_' + d.idx + '_scrollbar_vertical'),
                 $('#mCSB_' + d.idx + '_scrollbar_horizontal')
@@ -1066,8 +1106,8 @@ Based on version: 3.0.4
                 case 'touchstart':
                 case 'touchmove':
                 case 'touchend':
-                    touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-                    result = [touch.pageY, touch.pageX];
+                    touch   = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+                    result  = [touch.pageY, touch.pageX];
                     break;
                 default:
                     result = [e.pageY, e.pageX];
@@ -1082,16 +1122,16 @@ Based on version: 3.0.4
         scrolls content via scrollbar dragging 
         */
         _draggable: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var namespace = pluginPfx + '_' + d.idx;
+            var $this       = $(this);
+            var d           = $this.data(pluginPfx);
+            var o           = d.opt;
+            var namespace   = pluginPfx + '_' + d.idx;
             var draggerId = [
                 'mCSB_' + d.idx + '_dragger_vertical',
                 'mCSB_' + d.idx + '_dragger_horizontal'
             ];
             var mCSB_container = $('#mCSB_' + d.idx + '_container');
-            var mCSB_dragger = $('#' + draggerId[0] + ',#' +draggerId[1]);
+            var mCSB_dragger = $('#' + draggerId[0] + ',#' + draggerId[1]);
             var draggable;
             var dragY;
             var dragX;
@@ -1146,9 +1186,9 @@ Based on version: 3.0.4
             $(document).bind('mousemove.' + namespace + ' pointermove.' + namespace + ' MSPointerMove.' + namespace,
             function (e) {
                 if (draggable) {
-                    var offset = draggable.offset();
-                    var y = functions._coordinates(e)[0] - offset.top;
-                    var x = functions._coordinates(e)[1] - offset.left;
+                    var offset  = draggable.offset();
+                    var y       = functions._coordinates(e)[0] - offset.top;
+                    var x       = functions._coordinates(e)[1] - offset.left;
 
                     if (dragY === y) {
                         return;
@@ -1173,7 +1213,7 @@ Based on version: 3.0.4
             });
 
             function _iframe (evt) {
-                var el = mCSB_container.find('iframe');
+                var el  = mCSB_container.find('iframe');
                 var val = !evt ? 'none' : 'auto';
 
                 if (!el.length) {
@@ -1207,12 +1247,12 @@ Based on version: 3.0.4
         Emulates the native touch-swipe scrolling with momentum found in iOS, Android and WP devices 
         */
         _contentDraggable: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var namespace = pluginPfx + '_' + d.idx;
-            var mCustomScrollBox = $('#mCSB_' + d.idx);
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
+            var $this               = $(this);
+            var d                   = $this.data(pluginPfx);
+            var o                   = d.opt;
+            var namespace           = pluginPfx + '_' + d.idx;
+            var mCustomScrollBox    = $('#mCSB_' + d.idx);
+            var mCSB_container      = $('#mCSB_' + d.idx + '_container');
             var mCSB_dragger = [
                 $('#mCSB_' + d.idx + '_dragger_vertical'),
                 $('#mCSB_' + d.idx + '_dragger_horizontal')
@@ -1231,7 +1271,7 @@ Based on version: 3.0.4
             var amount;
             var durA = 0;
             var durB;
-            var overwrite = o.axis==='yx' ? 'none' : 'all';
+            var overwrite = o.axis === 'yx' ? 'none' : 'all';
             var offset;
 
             mCSB_container.bind('touchstart.' + namespace + ' pointerdown.' + namespace + ' MSPointerDown.' + namespace,
@@ -1276,7 +1316,9 @@ Based on version: 3.0.4
                     e.preventDefault();
                 } /* prevent native document scrolling */
 
-                amount = o.axis === 'yx' ? [(dragY - y), (dragX - x)] : o.axis === 'x' ? [null, (dragX - x)] : [(dragY - y), null];
+                amount = o.axis === 'yx'
+                            ? [(dragY - y), (dragX - x)]
+                            : o.axis === 'x' ? [null, (dragX - x)] : [(dragY - y), null];
                 mCSB_container[0].idleTimer = 250;
 
                 if (d.overflowed[0]) {
@@ -1374,11 +1416,11 @@ Based on version: 3.0.4
                 }
 
                 functions._scrollTo($this, amount.toString(), {
-                    dur: dur,
-                    scrollEasing: easing,
-                    dir: dir,
-                    overwrite: overwrite,
-                    drag: drag
+                    dur:            dur,
+                    scrollEasing:   easing,
+                    dir:            dir,
+                    overwrite:      overwrite,
+                    drag:           drag
                 });
             }
         },
@@ -1389,8 +1431,8 @@ Based on version: 3.0.4
         via mouse-wheel plugin (https://github.com/brandonaaron/jquery-mousewheel)
         */
         _mousewheel: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
+            var $this   = $(this);
+            var d       = $this.data(pluginPfx);
 
             if (d) { /* Check if the scrollbar is ready to use mousewheel events (issue: #185) */
                 var o = d.opt;
@@ -1503,8 +1545,7 @@ Based on version: 3.0.4
         _disableMousewheel: function (el, target) {
             var tag = target.nodeName.toLowerCase();
             var tags = el.data(pluginPfx).opt.mouseWheel.disableOver;
-                /* elements that require focus */
-            var focusTags = ['select', 'textarea'];
+            var focusTags = ['select', 'textarea']; /* elements that require focus */
 
             return $.inArray(tag,tags) > -1 && !($.inArray(tag,focusTags) > -1 && !$(target).is(':focus'));
         },
@@ -1564,17 +1605,17 @@ Based on version: 3.0.4
         scrolls content via element focus (e.g. clicking an input, pressing TAB key etc.)
         */
         _focus: function() {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var namespace = pluginPfx + '_' + d.idx;
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
-            var wrapper = mCSB_container.parent();
+            var $this           = $(this);
+            var d               = $this.data(pluginPfx);
+            var o               = d.opt;
+            var namespace       = pluginPfx + '_' + d.idx;
+            var mCSB_container  = $('#mCSB_' + d.idx + '_container');
+            var wrapper         = mCSB_container.parent();
 
             mCSB_container.bind('focusin.' + namespace, function () {
-                var el = $(document.activeElement);
-                var nested = mCSB_container.find('.mCustomScrollBox').length;
-                var dur = 0;
+                var el      = $(document.activeElement);
+                var nested  = mCSB_container.find('.mCustomScrollBox').length;
+                var dur     = 0;
 
                 if (!el.is(o.advanced.autoScrollOnFocus)) {
                     return;
@@ -1622,10 +1663,10 @@ Based on version: 3.0.4
 
         /* sets content wrapper scrollTop/scrollLeft always to 0 */
         _wrapperScroll: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var namespace = pluginPfx + '_' + d.idx;
-            var wrapper = $('#mCSB_' + d.idx + '_container').parent();
+            var $this       = $(this);
+            var d           = $this.data(pluginPfx);
+            var namespace   = pluginPfx + '_' + d.idx;
+            var wrapper     = $('#mCSB_' + d.idx + '_container').parent();
 
             wrapper.bind('scroll.' + namespace, function () {
                 wrapper
@@ -1639,13 +1680,13 @@ Based on version: 3.0.4
         scrolls content via up, down, left and right buttons 
         */
         _buttons: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var seq = d.sequential;
-            var namespace = pluginPfx + '_' + d.idx;
-            var sel = '.mCSB_' + d.idx + '_scrollbar';
-            var btn = $(sel+'>a');
+            var $this       = $(this);
+            var d           = $this.data(pluginPfx);
+            var o           = d.opt;
+            var seq         = d.sequential;
+            var namespace   = pluginPfx + '_' + d.idx;
+            var sel         = '.mCSB_' + d.idx + '_scrollbar';
+            var btn         = $(sel+'>a');
 
             function _seq (a,c) {
                 seq.scrollAmount = o.snapAmount || o.scrollButtons.scrollAmount;
@@ -1672,10 +1713,10 @@ Based on version: 3.0.4
                     case 'pointerdown':
                     case 'MSPointerDown':
                         if (seq.type === 'stepped') {
-                            return;
+                            break;
                         }
-                        touchActive = true;
-                        d.tweenRunning = false;
+                        touchActive     = true;
+                        d.tweenRunning  = false;
                         _seq('on', btnClass);
                         break;
                     case 'mouseup':
@@ -1686,7 +1727,7 @@ Based on version: 3.0.4
                     case 'pointerout':
                     case 'MSPointerOut':
                         if (seq.type === 'stepped') {
-                            return;
+                            break;
                         }
                         touchActive = false;
                         if (seq.dir) {
@@ -1695,7 +1736,7 @@ Based on version: 3.0.4
                         break;
                     case 'click':
                         if (seq.type !== 'stepped' || d.tweenRunning) {
-                            return;
+                            break;
                         }
                         _seq('on', btnClass);
                         break;
@@ -1709,15 +1750,15 @@ Based on version: 3.0.4
         Keys: up arrow, down arrow, left arrow, right arrow, PgUp, PgDn, Home, End
         */
         _keyboard: function () {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var seq = d.sequential;
-            var namespace = pluginPfx + '_' + d.idx;
-            var mCustomScrollBox = $('#mCSB_' + d.idx);
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
-            var wrapper = mCSB_container.parent();
-            var editables = 'input, textarea, select, datalist, keygen, [contenteditable="true"]';
+            var $this               = $(this);
+            var d                   = $this.data(pluginPfx);
+            var o                   = d.opt;
+            var seq                 = d.sequential;
+            var namespace           = pluginPfx + '_' + d.idx;
+            var mCustomScrollBox    = $('#mCSB_' + d.idx);
+            var mCSB_container      = $('#mCSB_' + d.idx + '_container');
+            var wrapper             = mCSB_container.parent();
+            var editables           = 'input, textarea, select, datalist, keygen, [contenteditable="true"]';
 
             function _seq (a,c) {
                 seq.type = o.keyboard.scrollType;
@@ -1816,11 +1857,11 @@ Based on version: 3.0.4
 
         /* scrolls content sequentially (used when scrolling via buttons, keyboard arrows etc.) */
         _sequentialScroll: function (el, action, trigger) {
-            var d = el.data(pluginPfx);
-            var o = d.opt;
-            var seq = d.sequential;
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
-            var once = seq.type === 'stepped' ? true : false;
+            var d               = el.data(pluginPfx);
+            var o               = d.opt;
+            var seq             = d.sequential;
+            var mCSB_container  = $('#mCSB_' + d.idx + '_container');
+            var once            = seq.type === 'stepped' ? true : false;
 
             /* starts sequence */
             function _start (once) {
@@ -1835,11 +1876,15 @@ Based on version: 3.0.4
                     d.scrollRatio.y > 10 ? 10 : d.scrollRatio.y,
                     d.scrollRatio.x > 10 ? 10 : d.scrollRatio.x
                 ];
-                var amount = seq.dir[0] === 'x' ? contentPos[1]+(seq.dir[1]*(ratio[1]*m)) : contentPos[0]+(seq.dir[1]*(ratio[0]*m));
-                var px = seq.dir[0] === 'x' ? contentPos[1] + (seq.dir[1] * parseInt(seq.scrollAmount)) : contentPos[0] + (seq.dir[1] * parseInt(seq.scrollAmount));
-                var to = seq.scrollAmount !== 'auto' ? px : amount;
-                var easing =! once ? 'mcsLinear' : c ? 'mcsLinearOut' : 'mcsEaseInOut';
-                var onComplete =! once ? false : true;
+                var amount      = seq.dir[0] === 'x'
+                                    ? contentPos[1]+(seq.dir[1]*(ratio[1]*m))
+                                    : contentPos[0]+(seq.dir[1]*(ratio[0]*m));
+                var px          = seq.dir[0] === 'x'
+                                    ? contentPos[1] + (seq.dir[1] * parseInt(seq.scrollAmount))
+                                    : contentPos[0] + (seq.dir[1] * parseInt(seq.scrollAmount));
+                var to          = seq.scrollAmount !== 'auto' ? px : amount;
+                var easing      =! once ? 'mcsLinear' : c ? 'mcsLinearOut' : 'mcsEaseInOut';
+                var onComplete  =! once ? false : true;
 
                 if (once && t < 17) {
                     to = seq.dir[0] === 'x' ? contentPos[1] : contentPos[0];
@@ -1879,7 +1924,7 @@ Based on version: 3.0.4
                     functions._stop(el);
 
                     if (functions._isNumeric(trigger) && seq.type === 'stepped') {
-                        return;
+                        break;
                     }
 
                     _start(once);
@@ -1893,17 +1938,16 @@ Based on version: 3.0.4
                     break;
             }
         },
-        /* -------------------- */
-        
         
         /* returns a yx array from value */
         _arr: function (val) {
-            var o = $(this).data(pluginPfx).opt;
-            var vals = [];
+            var o       = $(this).data(pluginPfx).opt;
+            var vals    = [];
 
+            /* check if the value is a single anonymous function */
             if (typeof val === 'function') {
                 val = val();
-            } /* check if the value is a single anonymous function */
+            }
 
             /* check if value is object or array, its length and create an array with yx values */
             if (!(val instanceof Array)) { /* object value (e.g. {y:'100',x:'100'}, 100 etc.) */
@@ -1930,12 +1974,12 @@ Based on version: 3.0.4
                 return;
             }
 
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
-            var wrapper = mCSB_container.parent();
-            var t = typeof val;
+            var $this           = $(this);
+            var d               = $this.data(pluginPfx);
+            var o               = d.opt;
+            var mCSB_container  = $('#mCSB_' + d.idx + '_container');
+            var wrapper         = mCSB_container.parent();
+            var t               = typeof val;
             var result;
             var objOffset;
             var p;
@@ -1945,10 +1989,10 @@ Based on version: 3.0.4
                 dir = o.axis === 'x' ? 'x' : 'y';
             }
 
-            var contentLength = dir === 'x' ? mCSB_container.outerWidth(false) : mCSB_container.outerHeight(false);
-            var contentOffset = dir === 'x' ? mCSB_container.offset().left : mCSB_container.offset().top;
-            var contentPos = dir === 'x' ? mCSB_container[0].offsetLeft : mCSB_container[0].offsetTop;
-            var cssProp = dir === 'x' ? 'left' : 'top';
+            var contentLength   = dir === 'x' ? mCSB_container.outerWidth(false) : mCSB_container.outerHeight(false);
+            var contentOffset   = dir === 'x' ? mCSB_container.offset().left : mCSB_container.offset().top;
+            var contentPos      = dir === 'x' ? mCSB_container[0].offsetLeft : mCSB_container[0].offsetTop;
+            var cssProp         = dir === 'x' ? 'left' : 'top';
 
             switch (t) {
                 case 'function': /* this currently is not used. Consider removing it */
@@ -1968,32 +2012,32 @@ Based on version: 3.0.4
                 case 'string':
                 case 'number':
                     if (functions._isNumeric.call(null, val)) { /* numeric value */
-                        return Math.abs(val);
+                        result = Math.abs(val);
                     } else if (val.indexOf('%') !== -1) { /* percentage value */
-                        return Math.abs(contentLength * parseInt(val) / 100);
+                        result = Math.abs(contentLength * parseInt(val) / 100);
                     } else if (val.indexOf('-=') !== -1) { /* decrease value */
-                        return Math.abs(contentPos - parseInt(val.split('-=')[1]));
+                        result = Math.abs(contentPos - parseInt(val.split('-=')[1]));
                     } else if (val.indexOf('+=') !== -1) { /* inrease value */
                         p = (contentPos + parseInt(val.split('+=')[1]));
-                        return p >= 0 ? 0 : Math.abs(p);
+                        result = p >= 0 ? 0 : Math.abs(p);
                     } else if (val.indexOf('px') !== -1 && functions._isNumeric.call(null, val.split('px')[0])) {
                         /* pixels string value (e.g. '100px') */
-                        return Math.abs(val.split('px')[0]);
+                        result = Math.abs(val.split('px')[0]);
                     } else {
                         if (val === 'top' || val==='left') { /* special strings */
-                            return 0;
+                            result = 0;
                         } else if (val === 'bottom') {
-                            return Math.abs(wrapper.height() - mCSB_container.outerHeight(false));
+                            result = Math.abs(wrapper.height() - mCSB_container.outerHeight(false));
                         } else if (val === 'right') {
-                            return Math.abs(wrapper.width() - mCSB_container.outerWidth(false));
+                            result = Math.abs(wrapper.width() - mCSB_container.outerWidth(false));
                         } else if (val === 'first' || val === 'last') {
                             obj = mCSB_container.find(':' + val);
                             objOffset = dir === 'x' ? $(obj).offset().left : $(obj).offset().top;
-                            return objOffset - contentOffset;
+                            result = objOffset - contentOffset;
                         } else {
                             if ($(val).length) { /* jquery selector */
                                 objOffset = dir === 'x' ? $(val).offset().left : $(val).offset().top;
-                                return objOffset - contentOffset;
+                                result = objOffset - contentOffset;
                             } else { /* other values (e.g. "100em") */
                                 mCSB_container.css(cssProp,val);
                                 methods.update.call(null, $this[0]);
@@ -2009,10 +2053,10 @@ Based on version: 3.0.4
 
         /* calls the update method automatically */
         _autoUpdate: function (rem) {
-            var $this = $(this);
-            var d = $this.data(pluginPfx);
-            var o = d.opt;
-            var mCSB_container = $('#mCSB_' + d.idx + '_container');
+            var $this           = $(this);
+            var d               = $this.data(pluginPfx);
+            var o               = d.opt;
+            var mCSB_container  = $('#mCSB_' + d.idx + '_container');
 
             if (rem) {
                 /* 
@@ -2057,6 +2101,7 @@ Based on version: 3.0.4
                 if (o.advanced.updateOnImageLoad) {
                     total = mCSB_container.find('img').length;
                 }
+
                 return total;
             }
 
@@ -2064,18 +2109,22 @@ Based on version: 3.0.4
 
             /* returns the total height and width sum of all elements matching the selector */
             function sizesSum() {
+                var total;
+                var sel;
+
                 if (o.advanced.updateOnSelectorChange === true) {
                     o.advanced.updateOnSelectorChange = '*';
                 }
 
-                var total = 0;
-                var sel = mCSB_container.find(o.advanced.updateOnSelectorChange);
+                total   = 0;
+                sel     = mCSB_container.find(o.advanced.updateOnSelectorChange);
 
                 if (o.advanced.updateOnSelectorChange && sel.length > 0) {
                     sel.each(function () {
                         total += $(this).height() + $(this).width();
                     });
                 }
+
                 return total;
             }
 
@@ -2165,14 +2214,15 @@ Based on version: 3.0.4
 
         /* snaps scrolling to a multiple of a pixels number */
         _snapAmount: function (to, amount, offset) {
-            return (Math.round(to/amount) * amount - offset);
+            return (Math.round(to / amount) * amount - offset);
         },
 
         /* stops content and scrollbar animations */
         _stop: function (el) {
-            var d = el.data(pluginPfx);
+            var d   = el.data(pluginPfx);
             var sel = $('#mCSB_' + d.idx + '_container,#mCSB_' + d.idx + '_container_wrapper,#mCSB_' + d.idx +
                         '_dragger_vertical,#mCSB_' + d.idx + '_dragger_horizontal');
+
             sel.each(function () {
                 functions._stopTween.call(this);
             });
@@ -2186,16 +2236,16 @@ Based on version: 3.0.4
             var d = el.data(pluginPfx);
             var o = d.opt;
             var defaults = {
-                trigger: 'internal',
-                dir: 'y',
-                scrollEasing: 'mcsEaseOut',
-                drag: false,
-                dur: o.scrollInertia,
-                overwrite: 'all',
-                callbacks: true,
-                onStart: true,
-                onUpdate: true,
-                onComplete: true
+                trigger:        'internal',
+                dir:            'y',
+                scrollEasing:   'mcsEaseOut',
+                drag:           false,
+                dur:            o.scrollInertia,
+                overwrite:      'all',
+                callbacks:      true,
+                onStart:        true,
+                onUpdate:       true,
+                onComplete:     true
             };
             var options = $.extend(defaults, options);
             var dur = [
@@ -2313,23 +2363,27 @@ Based on version: 3.0.4
 
             switch (options.dir) {
                 case 'x':
-                    mCSB_dragger = $('#mCSB_'+d.idx+'_dragger_horizontal');
-                    property = 'left';
-                    contentPos = mCSB_container[0].offsetLeft;
+                    mCSB_dragger            = $('#mCSB_'+d.idx+'_dragger_horizontal');
+                    property                = 'left';
+                    contentPos              = mCSB_container[0].offsetLeft;
+                    scrollTo                = [to,to === 0 ? 0 : (to/d.scrollRatio.x)];
+                    tso                     = totalScrollOffsets[1];
+                    tsbo                    = totalScrollBackOffsets[1];
+                    totalScrollOffset       = tso > 0 ? tso / d.scrollRatio.x : 0;
+                    totalScrollBackOffset   = tsbo > 0 ? tsbo/d.scrollRatio.x : 0;
                     limit = [
                         mCustomScrollBox.width() - mCSB_container.outerWidth(false),
                         mCSB_dragger.parent().width() - mCSB_dragger.width()
                     ];
-                    scrollTo = [to,to === 0 ? 0 : (to/d.scrollRatio.x)];
-                    tso = totalScrollOffsets[1];
-                    tsbo = totalScrollBackOffsets[1];
-                    totalScrollOffset = tso > 0 ? tso / d.scrollRatio.x : 0;
-                    totalScrollBackOffset = tsbo > 0 ? tsbo/d.scrollRatio.x : 0;
                     break;
                 case 'y':
-                    mCSB_dragger = $('#mCSB_' + d.idx + '_dragger_vertical');
-                    property = 'top';
-                    contentPos = mCSB_container[0].offsetTop;
+                    mCSB_dragger            = $('#mCSB_' + d.idx + '_dragger_vertical');
+                    property                = 'top';
+                    contentPos              = mCSB_container[0].offsetTop;
+                    tso                     = totalScrollOffsets[0];
+                    tsbo                    = totalScrollBackOffsets[0];
+                    totalScrollOffset       = tso > 0 ? tso / d.scrollRatio.y : 0;
+                    totalScrollBackOffset   = tsbo > 0 ? tsbo / d.scrollRatio.y : 0;
                     limit = [
                         mCustomScrollBox.height() - mCSB_container.outerHeight(false),
                         mCSB_dragger.parent().height() - mCSB_dragger.height()
@@ -2338,10 +2392,6 @@ Based on version: 3.0.4
                         to,
                         to === 0 ? 0 : (to / d.scrollRatio.y)
                     ];
-                    tso = totalScrollOffsets[0];
-                    tsbo = totalScrollBackOffsets[0];
-                    totalScrollOffset = tso > 0 ? tso / d.scrollRatio.y : 0;
-                    totalScrollBackOffset = tsbo > 0 ? tsbo / d.scrollRatio.y : 0;
                     break;
             }
 
@@ -2353,13 +2403,15 @@ Based on version: 3.0.4
                 scrollTo[0] =- scrollTo[0];
             }
 
+            /* init mcs object (once) to make it available before callbacks */
             if (!el[0].mcs) {
                 _mcs();
-            } /* init mcs object (once) to make it available before callbacks */
+            }
 
             clearTimeout(mCSB_container[0].onCompleteTimeout);
 
-            if (!d.tweenRunning && ((contentPos === 0 && scrollTo[0] >= 0) || (contentPos === limit[0] && scrollTo[0] <= limit[0]))) {
+            if (!d.tweenRunning &&
+                    ((contentPos === 0 && scrollTo[0] >= 0) || (contentPos === limit[0] && scrollTo[0] <= limit[0]))) {
                 return;
             }
 
@@ -2385,11 +2437,13 @@ Based on version: 3.0.4
                         }
                     }
                 }, onComplete: function () {
+                    var t;
+
                     if (options.callbacks && options.onComplete) {
                         if (o.axis === 'yx') {
                             clearTimeout(mCSB_container[0].onCompleteTimeout);
                         }
-                        var t = mCSB_container[0].idleTimer || 0;
+                        t = mCSB_container[0].idleTimer || 0;
                         mCSB_container[0].onCompleteTimeout = setTimeout(function () {
                             /* callbacks: onScroll, onTotalScroll, onTotalScrollBack */
                             if (_cb('onScroll')) {
@@ -2427,33 +2481,32 @@ Based on version: 3.0.4
         Animates top/left properties and includes easings 
         */
         _tweenTo: function (el, prop, to, duration, easing, overwrite, callbacks) {
-            var callbacks = callbacks || {};
-            var onStart = callbacks.onStart || function() {};
-            var onUpdate = callbacks.onUpdate || function() {};
-            var onComplete = callbacks.onComplete || function() {};
-            var startTime = functions._getTime();
+            var callbacks       = callbacks || {};
+            var onStart         = callbacks.onStart || function(){};
+            var onUpdate        = callbacks.onUpdate || function(){};
+            var onComplete      = callbacks.onComplete || function(){};
+            var startTime       = functions._getTime();
             var _delay,progress = 0;
-            var from = el.offsetTop;
-            var elStyle = el.style;
+            var from            = el.offsetTop;
+            var elStyle         = el.style;
             var _request;
+            var diff;
 
             if (prop === 'left') {
                 from = el.offsetLeft;
             }
 
-            var diff = to - from;
+            diff = to - from;
             el._mcsstop = 0;
 
-            function _step() {
+            function _step () {
                 if (el._mcsstop) {
                     return;
                 }
                 if (!progress) {
                     onStart.call();
                 }
-
                 progress = functions._getTime() - startTime;
-
                 _tween();
 
                 if (progress >= el._mcstime) {
@@ -2464,14 +2517,14 @@ Based on version: 3.0.4
                 }
                 if (el._mcstime < duration) {
                     el._mcsid = _request(_step);
-                } else {
+                } else { 
                     onComplete.call();
                 }
             }
 
-            function _tween() {
+            function _tween () {
                 if (duration > 0) {
-                    el._mcscurrVal = _ease(el._mcstime, from, diff, duration, easing);
+                    el._mcscurrVal = _ease(el._mcstime, from,diff, duration,easing);
                     elStyle[prop] = Math.round(el._mcscurrVal) + 'px';
                 } else {
                     elStyle[prop] = to + 'px';
@@ -2482,7 +2535,9 @@ Based on version: 3.0.4
             function _startTween() {
                 _delay = 1000 / 60;
                 el._mcstime = progress + _delay;
-                _request = (!window.requestAnimationFrame) ? function(f) {_tween(); return setTimeout(f, 0.01);} : window.requestAnimationFrame;
+                _request = (!window.requestAnimationFrame)
+                                ? function (f) {_tween(); return setTimeout(f, 0.01);}
+                                : window.requestAnimationFrame;
                 el._mcsid = _request(_step);
             }
 
@@ -2495,10 +2550,10 @@ Based on version: 3.0.4
                 } else {
                     window.cancelAnimationFrame(el._mcsid);
                 }
-                el._mcsid=null;
+                el._mcsid = null;
             }
-
-            function _ease(t, b, c, d, type) {
+    
+            function _ease (t, b, c, d, type) {
                 var result;
                 var ts;
                 var tc;
@@ -2517,23 +2572,26 @@ Based on version: 3.0.4
                         t /= d / 2;
                         if (t < 1) {
                             result = c / 2 * t * t + b;
+                            break;
                         }
                         t--;
-                        result = -c/2 * (t * (t - 2) - 1) + b;
+                        result = -c / 2 * (t * (t - 2) - 1) + b;
                         break;
                     case 'easeInOutStrong':
                         t /= d / 2;
                         if (t < 1) {
-                            result = c/2 * Math.pow( 2, 10 * (t - 1) ) + b;
+                            result = c / 2 * Math.pow( 2, 10 * (t - 1) ) + b;
+                            break;
                         }
                         t--;
-                        result = c/2 * (-Math.pow( 2, -10 * t) + 2 ) + b;
+                        result = c / 2 * (-Math.pow( 2, -10 * t) + 2 ) + b;
                         break;
                     case 'easeInOut':
                     case 'mcsEaseInOut':
                         t /= d / 2;
                         if (t < 1) {
                             result = c / 2 * t * t * t + b;
+                            break;
                         }
                         t -= 2;
                         result = c / 2 * (t * t * t + 2) + b;
@@ -2544,23 +2602,22 @@ Based on version: 3.0.4
                         result = -c * (t * t * t * t - 1) + b;
                         break;
                     case 'easeOutStrong':
-                        result = c * (-Math.pow( 2, -10 * t/d ) + 1 ) + b;
+                        result = c * ( -Math.pow( 2, -10 * t/d ) + 1 ) + b;
                         break;
                     default:
                         ts = (t /= d) * t;
                         tc = ts * t;
                         result = b + c * (0.499999999999997 * tc * ts + -2.5 * ts * ts + 5.5 * tc + -6.5 * ts + 4 * t);
-                        break;
                 }
-
-                if (overwrite !== 'none') {
-                    _cancelTween();
-                }
-
-                _startTween();
 
                 return result;
             }
+
+            if (overwrite !== 'none') {
+                _cancelTween();
+            }
+
+            _startTween();
         },
 
         /* returns current time */
@@ -2629,10 +2686,10 @@ Based on version: 3.0.4
     ----------------------------------------
     */
     
-    /* plugin constructor functions */
+/* plugin constructor functions */
     $.fn[pluginNS] = function(method) { /* usage: $(selector).mCustomScrollbar(); */
         if (methods[method]) {
-            return methods[method].apply(this,Array.prototype.slice.call(arguments, 1));
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
         } else if (typeof method === 'object' || !method) {
             return methods.init.apply(this, arguments);
         } else {
@@ -2669,4 +2726,3 @@ Based on version: 3.0.4
     });
 
 }));}(window, document));
-
