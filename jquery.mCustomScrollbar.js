@@ -4,13 +4,13 @@
  * Based on version 3.0.4
  */
 
-;(function (window, document, undefined) {
+;(function ($, window, document, undefined) {
 
 /* plugin dependencies */
 (function (init) {
     /* support for RequireJS */
     if (typeof define === 'function' && define.amd) {
-        define(['jquery', 'jquery-mousewheel'], init);
+        //define(['jquery', 'jquery-mousewheel'], init);
     } else {
         /* dependency location protocol */
         var protocol = ('https:' === document.location.protocol) ? 'https:' : 'http:'; 
@@ -83,9 +83,11 @@
                                             'object, [contenteditable="true"]',
             updateOnContentResize       : true,
             updateOnImageLoad           : true,
-            updateOnSelectorChange      : false
+            updateOnSelectorChange      : false,
+            releaseDraggableSelectors   : false
         },
         callbacks: {
+            onInit                      : false,
             onScrollStart               : false,
             onScroll                    : false,
             onTotalScroll               : false,
@@ -172,13 +174,13 @@
                 };
             }
 
-            options.mouseWheel.scrollAmount     = !options.mouseWheelPixels
-                                                    ? options.mouseWheel.scrollAmount
-                                                    : options.mouseWheelPixels;
-            options.mouseWheel.normalizeDelta   = !options.advanced.normalizeMouseWheelDelta
-                                                    ? options.mouseWheel.normalizeDelta
-                                                    : options.advanced.normalizeMouseWheelDelta;
-            options.scrollButtons.scrollType    = functions._findScrollButtonsType
+            options.mouseWheel.scrollAmount = !options.mouseWheelPixels
+                ? options.mouseWheel.scrollAmount
+                : options.mouseWheelPixels;
+            options.mouseWheel.normalizeDelta = !options.advanced.normalizeMouseWheelDelta
+                ? options.mouseWheel.normalizeDelta
+                : options.advanced.normalizeMouseWheelDelta;
+            options.scrollButtons.scrollType = functions._findScrollButtonsType
                                                     .call(null, options.scrollButtons.scrollType); 
 
             functions._theme.call(null, options); /* theme-specific options */
@@ -390,8 +392,8 @@
                     methodOptions = $.extend(true, {}, methodDefaults,options);
                     to = functions._arr.call(this,val);
                     dur = methodOptions.scrollInertia > 0 && methodOptions.scrollInertia < 17
-                            ? 17
-                            : methodOptions.scrollInertia;
+                        ? 17
+                        : methodOptions.scrollInertia;
 
                     /* translate yx values to actual scroll-to positions */
                     to[0]=functions._to.call(this, to[0], 'y');
@@ -419,9 +421,9 @@
                             functions._scrollTo.call(this, $this, to[0].toString(), methodOptions);
                         }
                         /* scroll x */
-                        if (to[1] !== null &&
-                             typeof to[1] !== 'undefined' &&
-                             o.axis !== 'y' && d.overflowed[1]) {
+                        if (to[1] !== null
+                            && typeof to[1] !== 'undefined'
+                            && o.axis !== 'y' && d.overflowed[1]) {
                             methodOptions.dir = 'x';
                             methodOptions.overwrite = 'none';
                             functions._scrollTo.call(this, $this, to[1].toString(), methodOptions);
@@ -585,25 +587,25 @@
                 'minimal-dark'
             ];
 
-            obj.autoDraggerLength       = $.inArray(obj.theme, fixedSizeScrollbarThemes) > -1
-                                            ? false
-                                            : obj.autoDraggerLength;
+            obj.autoDraggerLength = $.inArray(obj.theme, fixedSizeScrollbarThemes) > -1
+                ? false
+                : obj.autoDraggerLength;
 
-            obj.autoExpandScrollbar     = $.inArray(obj.theme, nonExpandedScrollbarThemes) > -1 
-                                            ? false
-                                            : obj.autoExpandScrollbar;
+            obj.autoExpandScrollbar = $.inArray(obj.theme, nonExpandedScrollbarThemes) > -1 
+                ? false
+                : obj.autoExpandScrollbar;
 
-            obj.scrollButtons.enable    = $.inArray(obj.theme, disabledScrollButtonsThemes) > -1
-                                            ? false
-                                            : obj.scrollButtons.enable;
+            obj.scrollButtons.enable = $.inArray(obj.theme, disabledScrollButtonsThemes) > -1
+                ? false
+                : obj.scrollButtons.enable;
 
-            obj.autoHideScrollbar       = $.inArray(obj.theme, enabledAutoHideScrollbarThemes) > -1
-                                            ? true
-                                            : obj.autoHideScrollbar;
+            obj.autoHideScrollbar = $.inArray(obj.theme, enabledAutoHideScrollbarThemes) > -1
+                ? true
+                : obj.autoHideScrollbar;
 
-            obj.scrollbarPosition       = $.inArray(obj.theme, scrollbarPositionOutsideThemes) > -1
-                                            ? 'outside'
-                                            : obj.scrollbarPosition;
+            obj.scrollbarPosition = $.inArray(obj.theme, scrollbarPositionOutsideThemes) > -1
+                ? 'outside'
+                : obj.scrollbarPosition;
         },
 
         /* normalizes axis option to valid values: "y", "x", "yx" */
@@ -641,14 +643,14 @@
                     + '<div class="mCSB_dragger_bar" /></div><div class="mCSB_draggerRail" /></div></div>'
             ];
             var wrapperClass = o.axis === 'yx'
-                                ? 'mCSB_vertical_horizontal'
-                                : o.axis === 'x' ? 'mCSB_horizontal' : 'mCSB_vertical';
+                ? 'mCSB_vertical_horizontal'
+                : o.axis === 'x' ? 'mCSB_horizontal' : 'mCSB_vertical';
             var scrollbars = o.axis === 'yx'
-                                ? scrollbar[0] + scrollbar[1]
-                                : o.axis === 'x' ? scrollbar[1] : scrollbar[0];
+                ? scrollbar[0] + scrollbar[1]
+                : o.axis === 'x' ? scrollbar[1] : scrollbar[0];
             var contentWrapper = o.axis === 'yx'
-                                ? '<div id="mCSB_' + d.idx + '_container_wrapper" class="mCSB_container_wrapper" />'
-                                : '';
+                ? '<div id="mCSB_' + d.idx + '_container_wrapper" class="mCSB_container_wrapper" />'
+                : '';
             var autoHideClass = o.autoHideScrollbar ? ' mCS-autoHide' : '';
             var scrollbarDirClass = (o.axis !== 'x' && d.langDir === 'rtl') ? ' mCS-dir-rtl' : '';
             var mCustomScrollBox;
@@ -887,12 +889,12 @@
             var d                   = $this.data(pluginPfx);
             var mCustomScrollBox    = $('#mCSB_' + d.idx);
             var mCSB_container      = $('#mCSB_' + d.idx + '_container');
-            var contentHeight       = d.overflowed === null
-                                        ? mCSB_container.height()
-                                        : mCSB_container.outerHeight(false);
-            var contentWidth        = d.overflowed === null
-                                        ? mCSB_container.width()
-                                        : mCSB_container.outerWidth(false);
+            var contentHeight = d.overflowed === null
+                ? mCSB_container.height()
+                : mCSB_container.outerHeight(false);
+            var contentWidth = d.overflowed === null
+                ? mCSB_container.width()
+                : mCSB_container.outerWidth(false);
 
             return [
                 contentHeight > mCustomScrollBox.height(),
@@ -990,12 +992,17 @@
         _unbindEvents: function () {
             var $this       = $(this);
             var d           = $this.data(pluginPfx);
+            var o           = d.opt;
             var namespace   = pluginPfx + '_' + d.idx;
             var sb          = '.mCSB_' + d.idx + '_scrollbar';
             var sel = $('#mCSB_' + d.idx + ',#mCSB_' + d.idx + '_container,#mCSB_' + d.idx + '_container_wrapper,'
                         + sb + ' .mCSB_draggerContainer,#mCSB_' + d.idx + '_dragger_vertical,#mCSB_' + d.idx
                         +'_dragger_horizontal,' + sb + '>a');
             var mCSB_container = $('#mCSB_' + d.idx + '_container');
+
+            if (o.advanced.releaseDraggableSelectors) {
+                sel.add($(o.advanced.releaseDraggableSelectors));
+            }
 
             if (d.bindEvents) { /* check if events are bound */
                 /* unbind namespaced events from document/selectors */
@@ -1092,6 +1099,7 @@
         _coordinates: function (e) {
             var t = e.type;
             var touch;
+            var touches;
             var result;
 
             switch (t) {
@@ -1101,16 +1109,17 @@
                 case 'MSPointerMove':
                 case 'pointerup':
                 case 'MSPointerUp':
-                    result = [e.originalEvent.pageY ,e.originalEvent.pageX];
+                    result = [e.originalEvent.pageY, e.originalEvent.pageX, false];
                     break;
                 case 'touchstart':
                 case 'touchmove':
                 case 'touchend':
                     touch   = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
-                    result  = [touch.pageY, touch.pageX];
+                    touches = e.originalEvent.touches.length || e.originalEvent.changedTouches.length;
+                    result  = [touch.pageY, touch.pageX, touches > 1];
                     break;
                 default:
-                    result = [e.pageY, e.pageX];
+                    result = [e.pageY, e.pageX, false];
                     break;
             }
 
@@ -1135,6 +1144,9 @@
             var draggable;
             var dragY;
             var dragX;
+            var rds = o.advanced.releaseDraggableSelectors
+                ? mCSB_dragger.add($(o.advanced.releaseDraggableSelectors))
+                : mCSB_dragger;
             var offset;
             var y;
             var x;
@@ -1196,7 +1208,7 @@
 
                     _drag(dragY, dragX, y, x);
                 }
-            }).add(mCSB_dragger).bind('mouseup.' + namespace + ' touchend.' + namespace + ' pointerup.' + namespace +
+            }).add(rds).bind('mouseup.' + namespace + ' touchend.' + namespace + ' pointerup.' + namespace +
                                         ' MSPointerUp.' + namespace, function () {
                 if (draggable) {
                     functions._onDragClasses(draggable, 'active', o.autoExpandScrollbar);
@@ -1272,20 +1284,25 @@
             var durA = 0;
             var durB;
             var overwrite = o.axis === 'yx' ? 'none' : 'all';
+            var touchIntent = [];
             var offset;
 
             mCSB_container.bind('touchstart.' + namespace + ' pointerdown.' + namespace + ' MSPointerDown.' + namespace,
                                 function (e) {
-                if (!functions._pointerTouch(e) || touchActive) {
+                if (!functions._pointerTouch(e) || touchActive || functions._coordinates(e)[2]) {
                     return;
                 }
 
                 offset = mCSB_container.offset();
                 dragY = functions._coordinates(e)[0] - offset.top;
                 dragX = functions._coordinates(e)[1] - offset.left;
+                touchIntent = [
+                    functions._coordinates(e)[0],
+                    functions._coordinates(e)[1]
+                ];
             }).bind('touchmove.' + namespace + ' pointermove.' + namespace + ' MSPointerMove.' + namespace,
                     function (e) {
-                if (!functions._pointerTouch(e) || touchActive) {
+                if (!functions._pointerTouch(e) || touchActive || functions._coordinates(e)[2]) {
                     return;
                 }
 
@@ -1302,14 +1319,17 @@
                 touchMoveY.push(y);
                 touchMoveX.push(x);
 
+                touchIntent[2] = Math.abs(functions._coordinates(e)[0] - touchIntent[0]);
+                touchIntent[3] = Math.abs(functions._coordinates(e)[1] - touchIntent[1]);
+
                 if (d.overflowed[0]) {
                     limit = mCSB_dragger[0].parent().height() - mCSB_dragger[0].height();
-                    prevent = ((dragY - y) > 0 && (y - dragY) >- (limit * d.scrollRatio.y));
+                    prevent=((dragY-y)>0 && (y-dragY)>-(limit*d.scrollRatio.y) && (touchIntent[3]*2<touchIntent[2] || o.axis==="yx"));
                 }
 
                 if (d.overflowed[1]) {
                     limitX = mCSB_dragger[1].parent().width() - mCSB_dragger[1].width();
-                    preventX = ((dragX - x) > 0 && (x - dragX) >- (limitX * d.scrollRatio.x));
+                    preventX = ((dragX - x) > 0 && (x - dragX)>-(limitX * d.scrollRatio.x) && (touchIntent[2] * 2 < touchIntent[3] || o.axis === 'yx'));
                 }
 
                 if (prevent || preventX) {
@@ -1331,7 +1351,7 @@
             });
 
             mCustomScrollBox.bind('touchstart.' + namespace + ' pointerdown.' + namespace + ' MSPointerDown.' + namespace, function (e) {
-                if (!functions._pointerTouch(e) || touchActive) {
+                if (!functions._pointerTouch(e) || touchActive || functions._coordinates(e)[2]) {
                     return;
                 }
 
@@ -1345,7 +1365,7 @@
                 touchMoveY = [];
                 touchMoveX = [];
             }).bind('touchend.' + namespace + ' pointerup.' + namespace + ' MSPointerUp.' + namespace, function (e) {
-                if (!functions._pointerTouch(e) || touchActive) {
+                if (!functions._pointerTouch(e) || touchActive || functions._coordinates(e)[2]) {
                     return;
                 }
 
@@ -1474,8 +1494,8 @@
                     } /* disables mouse-wheel when hovering specific elements */
 
                     deltaFactor = o.mouseWheel.deltaFactor !== 'auto'
-                                    ? parseInt(o.mouseWheel.deltaFactor)
-                                    : (oldIE && e.deltaFactor < 100) ? 100 : e.deltaFactor || 100;
+                        ? parseInt(o.mouseWheel.deltaFactor)
+                        : (oldIE && e.deltaFactor < 100) ? 100 : e.deltaFactor || 100;
 
                     if (o.axis === 'x' || o.mouseWheel.axis === 'x') {
                         dir = 'x';
@@ -1484,8 +1504,8 @@
                             parseInt(o.mouseWheel.scrollAmount)
                         ];
                         amount = o.mouseWheel.scrollAmount !== 'auto'
-                                        ? px[1]
-                                        : px[0] >= mCustomScrollBox.width() ? mCustomScrollBox.width() * 0.9 : px[0];
+                            ? px[1]
+                            : px[0] >= mCustomScrollBox.width() ? mCustomScrollBox.width() * 0.9 : px[0];
                         contentPos = Math.abs($('#mCSB_' + d.idx + '_container')[0].offsetLeft);
                         draggerPos = mCSB_dragger[1][0].offsetLeft;
                         limit = mCSB_dragger[1].parent().width() - mCSB_dragger[1].width();
@@ -1497,8 +1517,8 @@
                             parseInt(o.mouseWheel.scrollAmount)
                         ];
                         amount = o.mouseWheel.scrollAmount !== 'auto'
-                                        ? px[1]
-                                        : px[0] >= mCustomScrollBox.height() ? mCustomScrollBox.height() * 0.9 : px[0];
+                            ? px[1]
+                            : px[0] >= mCustomScrollBox.height() ? mCustomScrollBox.height() * 0.9 : px[0];
                         contentPos = Math.abs($('#mCSB_' + d.idx + '_container')[0].offsetTop);
                         draggerPos = mCSB_dragger[0][0].offsetTop;
                         limit = mCSB_dragger[0].parent().height() - mCSB_dragger[0].height();
@@ -1635,26 +1655,26 @@
                         mCSB_container[0].offsetLeft
                     ];
                     var isVisible = [
-                            (contentPos[0] + to[0] >= 0 && contentPos[0] + to[0] < wrapper.height() - el.outerHeight(false)),
-                            (contentPos[1] + to[1] >= 0 && contentPos[0] + to[1] < wrapper.width() - el.outerWidth(false))
+                        (contentPos[0] + to[0] >= 0 && contentPos[0] + to[0] < wrapper.height() - el.outerHeight(false)),
+                        (contentPos[1] + to[1] >= 0 && contentPos[0] + to[1] < wrapper.width() - el.outerWidth(false))
                     ];
                     var overwrite = (o.axis === 'yx' && !isVisible[0] && !isVisible[1]) ? 'none' : 'all';
 
                     if (o.axis !== 'x' && !isVisible[0]) {
                         functions._scrollTo($this,to[0].toString(), {
-                            dir: 'y',
-                            scrollEasing: 'mcsEaseInOut',
-                            overwrite: overwrite,
-                            dur:dur
+                            dir             : 'y',
+                            scrollEasing    : 'mcsEaseInOut',
+                            overwrite       : overwrite,
+                            dur             :dur
                         });
                     }
 
                     if (o.axis !== 'y' && !isVisible[1]) {
                         functions._scrollTo($this, to[1].toString(), {
-                            dir: 'x',
-                            scrollEasing: 'mcsEaseInOut',
-                            overwrite: overwrite,
-                            dur: dur
+                            dir             : 'x',
+                            scrollEasing    : 'mcsEaseInOut',
+                            overwrite       : overwrite,
+                            dur             : dur
                         });
                     }
                 }, $this[0]._focusTimer);
@@ -1669,9 +1689,10 @@
             var wrapper     = $('#mCSB_' + d.idx + '_container').parent();
 
             wrapper.bind('scroll.' + namespace, function () {
-                wrapper
-                    .scrollTop(0)
-                    .scrollLeft(0);
+                if (wrapper.scrollTop() !== 0 || wrapper.scrollLeft() !== 0) {
+                    /* hide scrollbar(s) */
+                    $('.mCSB_' + d.idx + '_scrollbar').css('visibility', 'hidden');
+                }
             });
         },
 
@@ -1876,25 +1897,33 @@
                     d.scrollRatio.y > 10 ? 10 : d.scrollRatio.y,
                     d.scrollRatio.x > 10 ? 10 : d.scrollRatio.x
                 ];
-                var amount      = seq.dir[0] === 'x'
-                                    ? contentPos[1]+(seq.dir[1]*(ratio[1]*m))
-                                    : contentPos[0]+(seq.dir[1]*(ratio[0]*m));
-                var px          = seq.dir[0] === 'x'
-                                    ? contentPos[1] + (seq.dir[1] * parseInt(seq.scrollAmount))
-                                    : contentPos[0] + (seq.dir[1] * parseInt(seq.scrollAmount));
-                var to          = seq.scrollAmount !== 'auto' ? px : amount;
-                var easing      =! once ? 'mcsLinear' : c ? 'mcsLinearOut' : 'mcsEaseInOut';
-                var onComplete  =! once ? false : true;
+                var amount = seq.dir[0] === 'x'
+                    ? contentPos[1]+(seq.dir[1]*(ratio[1]*m))
+                    : contentPos[0]+(seq.dir[1]*(ratio[0]*m));
+                var px = seq.dir[0] === 'x'
+                    ? contentPos[1] + (seq.dir[1] * parseInt(seq.scrollAmount))
+                    : contentPos[0] + (seq.dir[1] * parseInt(seq.scrollAmount));
+                var to = seq.scrollAmount !== 'auto' 
+                    ? px
+                    : amount;
+                var easing =! once
+                    ? 'mcsLinear' 
+                    : c ? 'mcsLinearOut' : 'mcsEaseInOut';
+                var onComplete =! once
+                    ? false
+                    : true;
 
                 if (once && t < 17) {
-                    to = seq.dir[0] === 'x' ? contentPos[1] : contentPos[0];
+                    to = seq.dir[0] === 'x'
+                        ? contentPos[1]
+                        : contentPos[0];
                 }
 
                 functions._scrollTo(el, to.toString(), {
-                    dir:seq.dir[0],
-                    scrollEasing:easing,
-                    dur:t,
-                    onComplete:onComplete
+                    dir             : seq.dir[0],
+                    scrollEasing    : easing,
+                    dur             : t,
+                    onComplete      : onComplete
                 });
 
                 if (once) {
@@ -1989,10 +2018,18 @@
                 dir = o.axis === 'x' ? 'x' : 'y';
             }
 
-            var contentLength   = dir === 'x' ? mCSB_container.outerWidth(false) : mCSB_container.outerHeight(false);
-            var contentOffset   = dir === 'x' ? mCSB_container.offset().left : mCSB_container.offset().top;
-            var contentPos      = dir === 'x' ? mCSB_container[0].offsetLeft : mCSB_container[0].offsetTop;
-            var cssProp         = dir === 'x' ? 'left' : 'top';
+            var contentLength = dir === 'x'
+                ? mCSB_container.outerWidth(false)
+                : mCSB_container.outerHeight(false);
+            var contentOffset = dir === 'x'
+                ? mCSB_container.offset().left
+                : mCSB_container.offset().top;
+            var contentPos = dir === 'x'
+                ? mCSB_container[0].offsetLeft
+                : mCSB_container[0].offsetTop;
+            var cssProp = dir === 'x'
+                ? 'left'
+                : 'top';
 
             switch (t) {
                 case 'function': /* this currently is not used. Consider removing it */
@@ -2000,12 +2037,16 @@
                     break;
                 case 'object':
                     if (val.nodeType) { /* DOM */
-                        objOffset = dir === 'x' ? $(val).offset().left : $(val).offset().top;
+                        objOffset = dir === 'x'
+                            ? $(val).offset().left
+                            : $(val).offset().top;
                     } else if (val.jquery) { /* jquery object */
                         if (!val.length) {
                             return;
                         }
-                        objOffset = dir === 'x' ? val.offset().left : val.offset().top;
+                        objOffset = dir === 'x'
+                            ? val.offset().left
+                            : val.offset().top;
                     }
                     result = objOffset - contentOffset;
                     break;
@@ -2076,8 +2117,12 @@
             ];
             var scrollbarSize = function () {
                 return [
-                    scrollbar[0].is(':visible') ? scrollbar[0].outerHeight(true) : 0, /* returns y-scrollbar height */
-                    scrollbar[1].is(':visible') ? scrollbar[1].outerWidth(true) : 0 /* returns x-scrollbar width */
+                    scrollbar[0].is(':visible')
+                        ? scrollbar[0].outerHeight(true)
+                        : 0, /* returns y-scrollbar height */
+                    scrollbar[1].is(':visible')
+                        ? scrollbar[1].outerWidth(true)
+                        : 0 /* returns x-scrollbar width */
                 ];
             };
             var oldSelSize;
@@ -2254,12 +2299,13 @@
             ];
             var mCustomScrollBox = $('#mCSB_' + d.idx);
             var mCSB_container = $('#mCSB_' + d.idx + '_container');
+            var wrapper = mCSB_container.parent();
             var totalScrollOffsets = o.callbacks.onTotalScrollOffset
-                                        ? functions._arr.call(el,o.callbacks.onTotalScrollOffset)
-                                        : [0,0];
+                ? functions._arr.call(el,o.callbacks.onTotalScrollOffset)
+                : [0,0];
             var totalScrollBackOffsets = o.callbacks.onTotalScrollBackOffset
-                                            ? functions._arr.call(el,o.callbacks.onTotalScrollBackOffset)
-                                            : [0,0];
+                ? functions._arr.call(el,o.callbacks.onTotalScrollBackOffset)
+                : [0,0];
             var mCSB_dragger;
             var property;
             var contentPos;
@@ -2275,6 +2321,13 @@
             /* checks if callback function exists */
             function _cb(cb) {
                 return d && o.callbacks[cb] && typeof o.callbacks[cb] === 'function';
+            }
+
+            if (wrapper.scrollTop() !== 0 || wrapper.scrollLeft() !== 0) { /* always reset scrollTop/Left */
+                $('.mCSB_' + d.idx + '_scrollbar').css('visibility', 'visible');
+                wrapper
+                    .scrollTop(0)
+                    .scrollLeft(0);
             }
 
             /* 
@@ -2406,6 +2459,9 @@
             /* init mcs object (once) to make it available before callbacks */
             if (!el[0].mcs) {
                 _mcs();
+                if (_cb('onInit')) {
+                    o.callbacks.onInit.call(el[0]);
+                } /* callbacks: onInit */
             }
 
             clearTimeout(mCSB_container[0].onCompleteTimeout);
@@ -2481,6 +2537,13 @@
         Animates top/left properties and includes easings 
         */
         _tweenTo: function (el, prop, to, duration, easing, overwrite, callbacks) {
+            if (!el._malihuTween) {
+                el._malihuTween = {
+                    top     :{},
+                    left    :{}
+                };
+            }
+
             var callbacks       = callbacks || {};
             var onStart         = callbacks.onStart || function(){};
             var onUpdate        = callbacks.onUpdate || function(){};
@@ -2490,6 +2553,7 @@
             var from            = el.offsetTop;
             var elStyle         = el.style;
             var _request;
+            var tobj = el._malihuTween[prop];
             var diff;
 
             if (prop === 'left') {
@@ -2497,10 +2561,10 @@
             }
 
             diff = to - from;
-            el._mcsstop = 0;
+            tobj.stop = 0;
 
             function _step () {
-                if (el._mcsstop) {
+                if (tobj.stop) {
                     return;
                 }
                 if (!progress) {
@@ -2509,14 +2573,14 @@
                 progress = functions._getTime() - startTime;
                 _tween();
 
-                if (progress >= el._mcstime) {
-                    el._mcstime = (progress > el._mcstime) ? progress + _delay - (progress - el._mcstime) : progress + _delay - 1;
-                    if (el._mcstime < progress + 1) {
-                        el._mcstime = progress + 1;
+                if (progress >= tobj.time) {
+                    tobj.time = (progress > tobj.time) ? progress + _delay - (progress - tobj.time) : progress + _delay - 1;
+                    if (tobj.time < progress + 1) {
+                        tobj.time = progress + 1;
                     }
                 }
-                if (el._mcstime < duration) {
-                    el._mcsid = _request(_step);
+                if (tobj.time < duration) {
+                    tobj.id = _request(_step);
                 } else { 
                     onComplete.call();
                 }
@@ -2524,8 +2588,8 @@
 
             function _tween () {
                 if (duration > 0) {
-                    el._mcscurrVal = _ease(el._mcstime, from,diff, duration,easing);
-                    elStyle[prop] = Math.round(el._mcscurrVal) + 'px';
+                    tobj.currVal = _ease(tobj.time, from,diff, duration,easing);
+                    elStyle[prop] = Math.round(tobj.currVal) + 'px';
                 } else {
                     elStyle[prop] = to + 'px';
                 }
@@ -2534,23 +2598,23 @@
 
             function _startTween() {
                 _delay = 1000 / 60;
-                el._mcstime = progress + _delay;
+                tobj.time = progress + _delay;
                 _request = (!window.requestAnimationFrame)
-                                ? function (f) {_tween(); return setTimeout(f, 0.01);}
-                                : window.requestAnimationFrame;
-                el._mcsid = _request(_step);
+                    ? function (f) {_tween(); return setTimeout(f, 0.01);}
+                    : window.requestAnimationFrame;
+                tobj.id = _request(_step);
             }
 
             function _cancelTween() {
-                if (el._mcsid === null) {
+                if (tobj.id === null) {
                     return;
                 }
                 if (!window.requestAnimationFrame) {
-                    clearTimeout(el._mcsid);
+                    clearTimeout(tobj.id);
                 } else {
-                    window.cancelAnimationFrame(el._mcsid);
+                    window.cancelAnimationFrame(tobj.id);
                 }
-                el._mcsid = null;
+                tobj.id = null;
             }
     
             function _ease (t, b, c, d, type) {
@@ -2641,17 +2705,30 @@
         _stopTween: function () {
             var el = this;
 
-            if (el._mcsid === null) {
-                return;
+            if (!el._malihuTween) {
+                el._malihuTween = {
+                    top:{},
+                    left:{}
+                };
             }
-            if (!window.requestAnimationFrame) {
-                clearTimeout(el._mcsid);
-            } else {
-                window.cancelAnimationFrame(el._mcsid);
+            if (el._malihuTween.top.id) {
+                if (!window.requestAnimationFrame) {
+                    clearTimeout(el._malihuTween.top.id);
+                } else {
+                    window.cancelAnimationFrame(el._malihuTween.top.id);
+                }
+                el._malihuTween.top.id      = null;
+                el._malihuTween.top.stop    = 1;
             }
-
-            el._mcsid = null;
-            el._mcsstop = 1;
+            if (el._malihuTween.left.id) {
+                if (!window.requestAnimationFrame) {
+                    clearTimeout(el._malihuTween.left.id);
+                } else {
+                    window.cancelAnimationFrame(el._malihuTween.left.id);
+                }
+                el._malihuTween.left.id     = null;
+                el._malihuTween.left.stop   = 1;
+            }
         },
 
         /* deletes a property (avoiding the exception thrown by IE) */
@@ -2725,4 +2802,4 @@
         $(defaultSelector)[pluginNS](); /* add scrollbars automatically on default selector */
     });
 
-}));}(window, document));
+}));}(jQuery, window, document));
